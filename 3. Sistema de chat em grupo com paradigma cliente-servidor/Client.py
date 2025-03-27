@@ -26,9 +26,8 @@ def main():
             if loggedUsername:
                 print(f"Você já está logado como {loggedUsername}!")
             else:
-                login_event.clear()
                 login_cmd(cmd)
-                login_event.wait()
+                
                 
         elif not loggedUsername:
             print("Você precisa estar logado para executar comandos!")
@@ -82,6 +81,13 @@ def receive_message():
                 login_event.set()
             elif message.startswith("Logout efetuado com sucesso"):
                 loggedUsername = None
+                seq_num[0] = 0	
+                login_event.set()
+            elif message.startswith("Username já está está sendo utilizado"):
+                seq_num[0] = 0	
+                login_event.set()
+            elif message.startswith("Você não está logado nesse usuário"):
+                seq_num[0] = 0	
                 login_event.set()
         except OSError as e:
             print(f"Erro ao receber mensagem: {e}")
@@ -94,7 +100,9 @@ def login_cmd(cmd):
         print("Nome de usuário não pode conter espaços!")
     else:
         print("Logando...")
+        login_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
+        login_event.wait()
 
 def logout_cmd(cmd):
     if len(cmd) > 1:

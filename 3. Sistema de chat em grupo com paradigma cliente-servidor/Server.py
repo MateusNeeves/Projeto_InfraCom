@@ -8,11 +8,11 @@ serverName = "localhost"
 serverPort = 12000
 buffer_size = 1024
 clientList = {} # {username: (address, port)}
-onlineClients = {} # {username: (address, port)}
+onlineClients = {} # {username: {"address": (address, port), "seq_num_expected": int}}"}
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_socket.bind((serverName, serverPort))
-seq_num_expected = [0]
+# seq_num_expected = [0]
 
 def main():
     print("Servidor pronto para receber arquivos.")
@@ -27,8 +27,18 @@ def receive_from_client(data, client_address, count):
     skt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     skt.bind(("localhost", 12000+count[0]))
 
+    username = find_username_by_address(client_address)
+    if username in onlineClients:
+        seq_num_expected = onlineClients[username]["seq_num_expected"]
+        seq_num_expected = [seq_num_expected]
+    else:
+        seq_num_expected = [0]
+
     print(f"Recebido: '{data.decode('utf-8')}' de '{client_address}'")
     cmd = receive(seq_num_expected, data, server_socket, client_address)
+
+    if username in onlineClients:
+        onlineClients[username]["seq_num_expected"] = seq_num_expected[0]
 
     if cmd is None:
         return
@@ -74,10 +84,10 @@ def find_username_by_address(addr):
 
 def login_cmd(skt, cmd, client_address):
     if cmd[1] in clientList and cmd[1] in onlineClients:
-        send([0], "Username já está está sendo utilizado.", skt, (client_address[0], client_address[1]+1))
+        send([0], "Username já está está sendo utilizado", skt, (client_address[0], client_address[1]+1))
     else:
         clientList[cmd[1]] = client_address
-        onlineClients[cmd[1]] = client_address
+        onlineClients[cmd[1]] = {"address": client_address, "seq_num_expected": 1}
         send([0], f"Login efetuado com sucesso em {cmd[1]}", skt, (client_address[0], client_address[1]+1))
 
 def logout_cmd(skt, cmd, client_address):
@@ -86,6 +96,6 @@ def logout_cmd(skt, cmd, client_address):
         del onlineClients[username]
         send([0], f"Logout efetuado com sucesso de {username}", skt, (client_address[0], client_address[1]+1))
     else:
-        send([0], "Você não está logado nesse usuário.", skt, (client_address[0], client_address[1]+1))
+        send([0], "Você não está logado nesse usuário", skt, (client_address[0], client_address[1]+1))
 
 main()

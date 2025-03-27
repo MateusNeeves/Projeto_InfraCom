@@ -33,9 +33,6 @@ def send(seq_num, data, sender_socket, address):
         n = m
         m += buffer_size - 2
 
-    # Indicar fim da transmissão
-    sender_socket.sendto(b"EOF", address)
-
 def receive(seq_num_expected, data, receiver_socket, address):
     try:
         if data == b"EOF":
