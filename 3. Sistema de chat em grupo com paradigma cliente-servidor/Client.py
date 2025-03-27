@@ -1,12 +1,91 @@
 import socket
 import os
-import random
 import time
-from sender_rdt3 import send
+from threading import Thread, Event
+from rdt3_0 import send
+from rdt3_0 import receive
 
 serverName = "localhost"
 serverPort = 12000
 buffer_size = 1024  # Tamanho do buffer
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+client_socket.bind(("localhost", 0))
+client_socket.settimeout(1)  # Timeout para retransmissão
+seq_num = [0]
+loggedUsername = None
+login_event = Event()
+
+def main():
+    Thread(target=receive_message).start()
+    while True:
+
+        print("Digite o comando:")
+        cmd = input().split(' ', 3)
+
+        if cmd[0] == 'login':
+            if loggedUsername:
+                print(f"Você já está logado como {loggedUsername}!")
+            else:
+                login_event.clear()
+                login_cmd(cmd)
+                login_event.wait()
+                
+        elif not loggedUsername:
+            print("Você precisa estar logado para executar comandos!")
+        else:
+            if cmd[0] == 'logout':
+                    logout_cmd(cmd)
+            elif cmd[0] == 'list:cinners':
+                list_cinners_cmd(cmd)
+            elif cmd[0] == 'list:friends':
+                list_friends_cmd(cmd)
+            elif cmd[0] == 'list:mygroups':
+                list_mygroups_cmd(cmd)
+            elif cmd[0] == 'list:groups':
+                list_groups_cmd(cmd)
+            elif cmd[0] == 'follow':
+                follow_cmd(cmd)
+            elif cmd[0] == 'unfollow':
+                unfollow_cmd(cmd)
+            elif cmd[0] == 'create_group':
+                create_group_cmd(cmd)
+            elif cmd[0] == 'delete_group':
+                delete_group_cmd(cmd)
+            elif cmd[0] == 'join':
+                join_cmd(cmd)
+            elif cmd[0] == 'leave':
+                leave_cmd(cmd)
+            elif cmd[0] == 'ban':
+                ban_cmd(cmd)
+            elif cmd[0] == 'chat_group':
+                chat_group_cmd(cmd)
+            elif cmd[0] == 'chat_friend':
+                chat_friend_cmd(cmd)
+            else:
+                print(f"Comando '{cmd[0]}' não existe!")
+
+
+def receive_message():
+    skt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    skt.bind(("localhost", client_socket.getsockname()[1]+1))
+    while True:
+        try:
+            data, client_address = skt.recvfrom(buffer_size)
+            message = receive([0], data, skt, client_address)
+            if message == None:
+                continue
+            message = message.decode('utf-8')
+            print(message)
+            if message.startswith("Login efetuado com sucesso"):
+                global loggedUsername
+                loggedUsername = message.split()[-1]
+                login_event.set()
+            elif message.startswith("Logout efetuado com sucesso"):
+                loggedUsername = None
+                login_event.set()
+        except OSError as e:
+            print(f"Erro ao receber mensagem: {e}")
+            break
 
 def login_cmd(cmd):
     if len(cmd) < 2:
@@ -15,42 +94,42 @@ def login_cmd(cmd):
         print("Nome de usuário não pode conter espaços!")
     else:
         print("Logando...")
-        send(" ".join(cmd), serverPort)
+        send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def logout_cmd(cmd):
     if len(cmd) > 1:
         print("Comando 'logout' não requer argumentos!")
     else:
         print("Deslogando...")
-        send(" ".join(cmd), serverPort)
+        send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
         
 def list_cinners_cmd(cmd):
     if len(cmd) > 1:
         print("Comando 'list:cinners' não requer argumentos!")
     else:
         print("Carregando lista de usuários conectados...")
-        send(" ".join(cmd), serverPort)
+        send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def list_friends_cmd(cmd):
     if len(cmd) > 1:
         print("Comando 'list:friends' não requer argumentos!")
     else:
         print("Carregando lista de amigos...")
-        send(" ".join(cmd), serverPort)
+        send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def list_mygroups_cmd(cmd):
     if len(cmd) > 1:
         print("Comando 'list:mygroups' não requer argumentos!")
     else:
         print("Carregando lista de grupos que vocë faz parte...")
-        send(" ".join(cmd), serverPort)
+        send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def list_groups_cmd(cmd):
     if len(cmd) > 1:
         print("Comando 'list:groups' não requer argumentos!")
     else:
         print("Carregando lista de grupos que vocë criou...")
-        send(" ".join(cmd), serverPort)
+        send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def follow_cmd(cmd):
     if len(cmd) < 2:
@@ -59,7 +138,7 @@ def follow_cmd(cmd):
         print("Nome de usuário não pode conter espaços!")
     else:
         print(f"Seguindo {cmd[1]}...")
-        send(" ".join(cmd), serverPort)
+        send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def unfollow_cmd(cmd):
     if len(cmd) < 2:
@@ -68,7 +147,7 @@ def unfollow_cmd(cmd):
         print("Nome de usuário não pode conter espaços!")
     else:
         print(f"Deixando de seguir {cmd[1]}...")
-        send(" ".join(cmd), serverPort)
+        send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def create_group_cmd(cmd):
     if len(cmd) < 2:
@@ -77,7 +156,7 @@ def create_group_cmd(cmd):
         print("Nome do grupo não pode conter espaços!")
     else:
         print(f"Criando grupo '{cmd[1]}'...")
-        send(" ".join(cmd), serverPort)
+        send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def delete_group_cmd(cmd):
     if len(cmd) < 2:
@@ -86,7 +165,7 @@ def delete_group_cmd(cmd):
         print("Nome do grupo não pode conter espaços!")
     else:
         print(f"Deletando grupo '{cmd[1]}'...")
-        send(" ".join(cmd), serverPort)
+        send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def join_cmd(cmd):
     if len(cmd) < 3:
@@ -95,7 +174,7 @@ def join_cmd(cmd):
         print("Nome do grupo e chave do grupo não podem conter espaços!")
     else:
         print(f"Entrando no grupo '{cmd[1]}' - '{cmd[2]}'...")
-        send(" ".join(cmd), serverPort)
+        send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def leave_cmd(cmd):
     if len(cmd) < 2:
@@ -104,58 +183,20 @@ def leave_cmd(cmd):
         print("Nome do grupo não pode conter espaços!")
     else:
         print(f"Saindo do grupo '{cmd[1]}'...")
-        send(" ".join(cmd), serverPort)
+        send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def chat_group_cmd(cmd):
-    if len(cmd) < 3:
+    if len(cmd) < 4:
         print("Comando 'chat_group' requer o nome do grupo, a chave do grupo e a mensagem a ser enviada")
     else:
         print(f"Enviando mensagem no grupo '{cmd[1]}' - '{cmd[2]}'...")
-        send(" ".join(cmd), serverPort)
+        send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def chat_friend_cmd(cmd):
     if len(cmd) < 3:
-        print("Comando 'chat_friend' requer o nome do akmigo e a mensagem a ser enviada")
+        print("Comando 'chat_friend' requer o nome do amigo e a mensagem a ser enviada")
     else:
         print(f"Enviando mensagem ao amigo '{cmd[1]}'...")
-        send(" ".join(cmd), serverPort)
+        send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
-while True:
-    print("Digite o comando:")
-    cmd = input().split()
-
-    if cmd[0] == 'login':
-        login_cmd(cmd)
-    elif cmd[0] == 'logout':
-        logout_cmd(cmd)
-    elif cmd[0] == 'list:cinners':
-        list_cinners_cmd(cmd)
-    elif cmd[0] == 'list:friends':
-        list_friends_cmd(cmd)
-    elif cmd[0] == 'list:mygroups':
-        list_mygroups_cmd(cmd)
-    elif cmd[0] == 'list:groups':
-        list_groups_cmd(cmd)
-    elif cmd[0] == 'follow':
-        follow_cmd(cmd)
-    elif cmd[0] == 'unfollow':
-        unfollow_cmd(cmd)
-    elif cmd[0] == 'create_group':
-        create_group_cmd(cmd)
-    elif cmd[0] == 'delete_group':
-        delete_group_cmd(cmd)
-    elif cmd[0] == 'join':
-        join_cmd(cmd)
-    elif cmd[0] == 'leave':
-        leave_cmd(cmd)
-    elif cmd[0] == 'ban':
-        ban_cmd(cmd)
-    elif cmd[0] == 'chat_group':
-        chat_group_cmd(cmd)
-    elif cmd[0] == 'chat_friend':
-        chat_friend_cmd(cmd)
-
-    else:
-        print(f"Comando '{cmd[0]}' não existe!")
-
-  
+main()
