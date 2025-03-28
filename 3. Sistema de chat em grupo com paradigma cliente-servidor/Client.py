@@ -4,6 +4,10 @@ import time
 from threading import Thread, Event
 from rdt3_0 import send
 from rdt3_0 import receive
+from colorama import Fore, Style, init
+
+# Inicializa o colorama para funcionar no Windows
+init(autoreset=True)
 
 serverName = "localhost"
 serverPort = 12000
@@ -18,22 +22,20 @@ login_event = Event()
 def main():
     Thread(target=receive_message).start()
     while True:
-
-        print("Digite o comando:")
+        print(Fore.CYAN + "Digite o comando:")
         cmd = input().split(' ', 3)
 
         if cmd[0] == 'login':
             if loggedUsername:
-                print(f"Você já está logado como {loggedUsername}!")
+                print(Fore.YELLOW + f"Você já está logado como {loggedUsername}!")
             else:
                 login_cmd(cmd)
-                
-                
+
         elif not loggedUsername:
-            print("Você precisa estar logado para executar comandos!")
+            print(Fore.RED + "Você precisa estar logado para executar comandos!")
         else:
             if cmd[0] == 'logout':
-                    logout_cmd(cmd)
+                logout_cmd(cmd)
             elif cmd[0] == 'list:cinners':
                 list_cinners_cmd(cmd)
             elif cmd[0] == 'list:friends':
@@ -43,7 +45,10 @@ def main():
             elif cmd[0] == 'list:groups':
                 list_groups_cmd(cmd)
             elif cmd[0] == 'follow':
-                follow_cmd(cmd)
+                if cmd[1] == loggedUsername:
+                    print(Fore.RED + "Você não pode seguir a si mesmo!")
+                else:
+                    follow_cmd(cmd)
             elif cmd[0] == 'unfollow':
                 unfollow_cmd(cmd)
             elif cmd[0] == 'create_group':
@@ -61,8 +66,7 @@ def main():
             elif cmd[0] == 'chat_friend':
                 chat_friend_cmd(cmd)
             else:
-                print(f"Comando '{cmd[0]}' não existe!")
-
+                print(Fore.RED + f"Comando '{cmd[0]}' não existe!")
 
 def receive_message():
     skt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -74,7 +78,7 @@ def receive_message():
             if message == None:
                 continue
             message = message.decode('utf-8')
-            print(message)
+            print(Fore.MAGENTA + message)
             if message.startswith("Login efetuado com sucesso"):
                 global loggedUsername
                 loggedUsername = message.split()[-1]
@@ -90,121 +94,121 @@ def receive_message():
                 seq_num[0] = 0	
                 login_event.set()
         except OSError as e:
-            print(f"Erro ao receber mensagem: {e}")
+            print(Fore.YELLOW + f"Erro ao receber mensagem: {e}")
             break
 
 def login_cmd(cmd):
     if len(cmd) < 2:
-        print("Comando 'login' requer um nome de usuário!")
+        print(Fore.RED + "Comando 'login' requer um nome de usuário!")
     elif len(cmd) > 2:
-        print("Nome de usuário não pode conter espaços!")
+        print(Fore.RED + "Nome de usuário não pode conter espaços!")
     else:
-        print("Logando...")
+        print(Fore.GREEN + "Logando...")
         login_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
         login_event.wait()
 
 def logout_cmd(cmd):
     if len(cmd) > 1:
-        print("Comando 'logout' não requer argumentos!")
+        print(Fore.RED + "Comando 'logout' não requer argumentos!")
     else:
-        print("Deslogando...")
+        print(Fore.GREEN + "Deslogando...")
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
-        
+
 def list_cinners_cmd(cmd):
     if len(cmd) > 1:
-        print("Comando 'list:cinners' não requer argumentos!")
+        print(Fore.RED + "Comando 'list:cinners' não requer argumentos!")
     else:
-        print("Carregando lista de usuários conectados...")
+        print(Fore.GREEN + "Carregando lista de usuários conectados...")
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def list_friends_cmd(cmd):
     if len(cmd) > 1:
-        print("Comando 'list:friends' não requer argumentos!")
+        print(Fore.RED + "Comando 'list:friends' não requer argumentos!")
     else:
-        print("Carregando lista de amigos...")
+        print(Fore.GREEN + "Carregando lista de amigos...")
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def list_mygroups_cmd(cmd):
     if len(cmd) > 1:
-        print("Comando 'list:mygroups' não requer argumentos!")
+        print(Fore.RED + "Comando 'list:mygroups' não requer argumentos!")
     else:
-        print("Carregando lista de grupos que vocë faz parte...")
+        print(Fore.GREEN + "Carregando lista de grupos que você faz parte...")
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def list_groups_cmd(cmd):
     if len(cmd) > 1:
-        print("Comando 'list:groups' não requer argumentos!")
+        print(Fore.RED + "Comando 'list:groups' não requer argumentos!")
     else:
-        print("Carregando lista de grupos que vocë criou...")
+        print(Fore.GREEN + "Carregando lista de grupos que você criou...")
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def follow_cmd(cmd):
     if len(cmd) < 2:
-        print("Comando 'follow' requer um nome de usuário!")
+        print(Fore.RED + "Comando 'follow' requer um nome de usuário!")
     elif len(cmd) > 2:
-        print("Nome de usuário não pode conter espaços!")
+        print(Fore.RED + "Nome de usuário não pode conter espaços!")
     else:
-        print(f"Seguindo {cmd[1]}...")
+        print(Fore.GREEN + f"Seguindo {cmd[1]}...")
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def unfollow_cmd(cmd):
     if len(cmd) < 2:
-        print("Comando 'unfollow' requer um nome de usuário!")
+        print(Fore.RED + "Comando 'unfollow' requer um nome de usuário!")
     elif len(cmd) > 2:
-        print("Nome de usuário não pode conter espaços!")
+        print(Fore.RED + "Nome de usuário não pode conter espaços!")
     else:
-        print(f"Deixando de seguir {cmd[1]}...")
+        print(Fore.GREEN + f"Deixando de seguir {cmd[1]}...")
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def create_group_cmd(cmd):
     if len(cmd) < 2:
-        print("Comando 'create_group' requer o nome do grupo!")
+        print(Fore.RED + "Comando 'create_group' requer o nome do grupo!")
     elif len(cmd) > 2:
-        print("Nome do grupo não pode conter espaços!")
+        print(Fore.RED + "Nome do grupo não pode conter espaços!")
     else:
-        print(f"Criando grupo '{cmd[1]}'...")
+        print(Fore.GREEN + f"Criando grupo '{cmd[1]}'...")
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def delete_group_cmd(cmd):
     if len(cmd) < 2:
-        print("Comando 'delete_group' requer o nome do grupo!")
+        print(Fore.RED + "Comando 'delete_group' requer o nome do grupo!")
     elif len(cmd) > 2:
-        print("Nome do grupo não pode conter espaços!")
+        print(Fore.RED + "Nome do grupo não pode conter espaços!")
     else:
-        print(f"Deletando grupo '{cmd[1]}'...")
+        print(Fore.GREEN + f"Deletando grupo '{cmd[1]}'...")
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def join_cmd(cmd):
     if len(cmd) < 3:
-        print("Comando 'join' requer o nome do grupo e a chave do grupo!")
+        print(Fore.RED + "Comando 'join' requer o nome do grupo e a chave do grupo!")
     elif len(cmd) > 3:
-        print("Nome do grupo e chave do grupo não podem conter espaços!")
+        print(Fore.RED + "Nome do grupo e chave do grupo não podem conter espaços!")
     else:
-        print(f"Entrando no grupo '{cmd[1]}' - '{cmd[2]}'...")
+        print(Fore.GREEN + f"Entrando no grupo '{cmd[1]}' - '{cmd[2]}'...")
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def leave_cmd(cmd):
     if len(cmd) < 2:
-        print("Comando 'leave' requer o nome do grupo")
+        print(Fore.RED + "Comando 'leave' requer o nome do grupo!")
     elif len(cmd) > 2:
-        print("Nome do grupo não pode conter espaços!")
+        print(Fore.RED + "Nome do grupo não pode conter espaços!")
     else:
-        print(f"Saindo do grupo '{cmd[1]}'...")
+        print(Fore.GREEN + f"Saindo do grupo '{cmd[1]}'...")
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def chat_group_cmd(cmd):
     if len(cmd) < 4:
-        print("Comando 'chat_group' requer o nome do grupo, a chave do grupo e a mensagem a ser enviada")
+        print(Fore.RED + "Comando 'chat_group' requer o nome do grupo, a chave do grupo e a mensagem a ser enviada!")
     else:
-        print(f"Enviando mensagem no grupo '{cmd[1]}' - '{cmd[2]}'...")
+        print(Fore.GREEN + f"Enviando mensagem no grupo '{cmd[1]}' - '{cmd[2]}'...")
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 def chat_friend_cmd(cmd):
     if len(cmd) < 3:
-        print("Comando 'chat_friend' requer o nome do amigo e a mensagem a ser enviada")
+        print(Fore.RED + "Comando 'chat_friend' requer o nome do amigo e a mensagem a ser enviada!")
     else:
-        print(f"Enviando mensagem ao amigo '{cmd[1]}'...")
+        print(Fore.GREEN + f"Enviando mensagem ao amigo '{cmd[1]}'...")
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
 
 main()
