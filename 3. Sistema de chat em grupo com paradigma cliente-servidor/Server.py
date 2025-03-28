@@ -50,9 +50,9 @@ def receive_from_client(data, client_address, count):
     elif cmd[0] == 'logout':
         logout_cmd(skt, cmd, client_address)
     elif cmd[0] == 'list:cinners':
-        pass
+        list_cinners_cmd(skt, cmd, client_address)
     elif cmd[0] == 'list:friends':
-        pass
+        list_friends_cmd(skt, cmd, client_address)
     elif cmd[0] == 'list:mygroups':
         pass
     elif cmd[0] == 'list:groups':
@@ -84,43 +84,64 @@ def find_username_by_address(addr):
 
 def login_cmd(skt, cmd, client_address):
     if cmd[1] in clientList and cmd[1] in onlineClients:
-        send([0], "Username já está está sendo utilizado", skt, (client_address[0], client_address[1]+1))
+        send([0], "Username já está está sendo utilizado\n", skt, (client_address[0], client_address[1]+1))
     else:
         clientList[cmd[1]] = client_address
         onlineClients[cmd[1]] = {"seq_num_expected": 1}
         friendsList[cmd[1]] = set()
-        send([0], f"Login efetuado com sucesso em {cmd[1]}", skt, (client_address[0], client_address[1]+1))
+        send([0], f"Login efetuado com sucesso em [{cmd[1]}]\n", skt, (client_address[0], client_address[1]+1))
 
 def logout_cmd(skt, cmd, client_address):
     username = find_username_by_address(client_address)
     if username in onlineClients:
         del onlineClients[username]
-        send([0], f"Logout efetuado com sucesso de {username}", skt, (client_address[0], client_address[1]+1))
+        send([0], f"Logout efetuado com sucesso de [{username}]\n", skt, (client_address[0], client_address[1]+1))
     else:
-        send([0], "Você não está logado nesse usuário", skt, (client_address[0], client_address[1]+1))
+        send([0], "Você não está logado nesse usuário\n", skt, (client_address[0], client_address[1]+1))
 
 def follow_cmd(skt, cmd, client_address):
     username = find_username_by_address(client_address)
     if cmd[1] not in clientList:
-        send([0], f"Usuário [{cmd[1]}] não encontrado", skt, (client_address[0], client_address[1]+1))
+        send([0], f"Usuário [{cmd[1]}] não encontrado\n", skt, (client_address[0], client_address[1]+1))
     elif cmd[1] not in friendsList[username]:
         friendsList[username].add(cmd[1])
 
-        send([0], f"[{cmd[1]}] foi adicionado a sua lista de amigos seguidos", skt, (client_address[0], client_address[1]+1))
+        send([0], f"[{cmd[1]}] foi adicionado a sua lista de amigos seguidos\n", skt, (client_address[0], client_address[1]+1))
         if cmd[1] in onlineClients:
-            send([0], f"Você foi seguido por [{username}/{client_address[0]}:{client_address[1]}]", skt, (clientList[cmd[1]][0], clientList[cmd[1]][1]+1))
+            send([0], f"Você foi seguido por [{username}/{client_address[0]}:{client_address[1]}]\n", skt, (clientList[cmd[1]][0], clientList[cmd[1]][1]+1))
     else:
-        send([0], f"Você já está seguindo [{cmd[1]}].", skt, (client_address[0], client_address[1]+1))
+        send([0], f"Você já está seguindo [{cmd[1]}]\n", skt, (client_address[0], client_address[1]+1))
 
 def unfollow_cmd(skt, cmd, client_address):
     username = find_username_by_address(client_address)
 
     if cmd[1] in friendsList[username]:
         friendsList[username].remove(cmd[1])
-        send([0], f"[{cmd[1]}] foi removido da sua lista de amigos seguidos", skt, (client_address[0], client_address[1]+1))
+        send([0], f"[{cmd[1]}] foi removido da sua lista de amigos seguidos\n", skt, (client_address[0], client_address[1]+1))
         if cmd[1] in onlineClients:
-            send([0], f"[{username}/{client_address[0]}:{client_address[1]}] deixou de seguir você", skt, (clientList[cmd[1]][0], clientList[cmd[1]][1]+1))
+            send([0], f"[{username}/{client_address[0]}:{client_address[1]}] deixou de seguir você\n", skt, (clientList[cmd[1]][0], clientList[cmd[1]][1]+1))
     else:
-        send([0], f"Você não está seguindo [{cmd[1]}]", skt, (client_address[0], client_address[1]+1))
+        send([0], f"Você não está seguindo [{cmd[1]}]\n", skt, (client_address[0], client_address[1]+1))
+
+def list_cinners_cmd(skt, cmd, client_address):
+    data = "Usuários Online:\n"
+    
+    for user in onlineClients:
+        data += "- " + user + "\n"
+    
+    send([0], data, skt, (client_address[0], client_address[1]+1))
+
+def list_friends_cmd(skt, cmd, client_address):
+    username = find_username_by_address(client_address)
+    data = "Lista de amigos seguidos:\n"
+
+    if not friendsList[username]:
+        send([0], "A lista de amigos seguidos está vazia.\n", skt, (client_address[0], client_address[1]+1))
+        return
+
+    for user in friendsList[username]:
+        data += "- " + user + "\n"
+    
+    send([0], data, skt, (client_address[0], client_address[1]+1))
 
 main()

@@ -18,21 +18,25 @@ client_socket.settimeout(1)  # Timeout para retransmissão
 seq_num = [0]
 loggedUsername = None
 login_event = Event()
+sync_msg_event = Event()
 
 def main():
     Thread(target=receive_message).start()
+    print(Fore.CYAN + "Digite o comando:")
     while True:
-        print(Fore.CYAN + "Digite o comando:")
+        #print(Fore.CYAN + "Digite o comando:")
         cmd = input().split(' ', 3)
 
         if cmd[0] == 'login':
             if loggedUsername:
                 print(Fore.YELLOW + f"Você já está logado como {loggedUsername}!")
+                print(Fore.CYAN + "Digite o comando:")
             else:
                 login_cmd(cmd)
 
         elif not loggedUsername:
             print(Fore.RED + "Você precisa estar logado para executar comandos!")
+            print(Fore.CYAN + "Digite o comando:")
         else:
             if cmd[0] == 'logout':
                 logout_cmd(cmd)
@@ -47,6 +51,7 @@ def main():
             elif cmd[0] == 'follow':
                 if cmd[1] == loggedUsername:
                     print(Fore.RED + "Você não pode seguir a si mesmo!")
+                    print(Fore.CYAN + "Digite o comando:")
                 else:
                     follow_cmd(cmd)
             elif cmd[0] == 'unfollow':
@@ -67,6 +72,9 @@ def main():
                 chat_friend_cmd(cmd)
             else:
                 print(Fore.RED + f"Comando '{cmd[0]}' não existe!")
+                print(Fore.CYAN + "Digite o comando:")
+        
+        
 
 def receive_message():
     skt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -93,6 +101,9 @@ def receive_message():
             elif message.startswith("Você não está logado nesse usuário"):
                 seq_num[0] = 0	
                 login_event.set()
+
+            print(Fore.CYAN + "Digite o comando:")
+            sync_msg_event.set()
         except OSError as e:
             print(Fore.YELLOW + f"Erro ao receber mensagem: {e}")
             break
@@ -100,8 +111,10 @@ def receive_message():
 def login_cmd(cmd):
     if len(cmd) < 2:
         print(Fore.RED + "Comando 'login' requer um nome de usuário!")
+        print(Fore.CYAN + "Digite o comando:")
     elif len(cmd) > 2:
         print(Fore.RED + "Nome de usuário não pode conter espaços!")
+        print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + "Logando...")
         login_event.clear()
@@ -111,104 +124,149 @@ def login_cmd(cmd):
 def logout_cmd(cmd):
     if len(cmd) > 1:
         print(Fore.RED + "Comando 'logout' não requer argumentos!")
+        print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + "Deslogando...")
+        sync_msg_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
+        sync_msg_event.wait()
 
 def list_cinners_cmd(cmd):
     if len(cmd) > 1:
         print(Fore.RED + "Comando 'list:cinners' não requer argumentos!")
+        print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + "Carregando lista de usuários conectados...")
+        sync_msg_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
+        sync_msg_event.wait()
 
 def list_friends_cmd(cmd):
     if len(cmd) > 1:
         print(Fore.RED + "Comando 'list:friends' não requer argumentos!")
+        print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + "Carregando lista de amigos...")
+        sync_msg_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
+        sync_msg_event.wait()
 
 def list_mygroups_cmd(cmd):
     if len(cmd) > 1:
         print(Fore.RED + "Comando 'list:mygroups' não requer argumentos!")
+        print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + "Carregando lista de grupos que você faz parte...")
+        sync_msg_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
+        sync_msg_event.wait()
 
 def list_groups_cmd(cmd):
     if len(cmd) > 1:
         print(Fore.RED + "Comando 'list:groups' não requer argumentos!")
+        print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + "Carregando lista de grupos que você criou...")
+        sync_msg_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
+        sync_msg_event.wait()
 
 def follow_cmd(cmd):
     if len(cmd) < 2:
         print(Fore.RED + "Comando 'follow' requer um nome de usuário!")
+        print(Fore.CYAN + "Digite o comando:")
     elif len(cmd) > 2:
         print(Fore.RED + "Nome de usuário não pode conter espaços!")
+        print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + f"Seguindo {cmd[1]}...")
+        sync_msg_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
+        sync_msg_event.wait()
 
 def unfollow_cmd(cmd):
     if len(cmd) < 2:
         print(Fore.RED + "Comando 'unfollow' requer um nome de usuário!")
+        print(Fore.CYAN + "Digite o comando:")
     elif len(cmd) > 2:
         print(Fore.RED + "Nome de usuário não pode conter espaços!")
+        print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + f"Deixando de seguir {cmd[1]}...")
+        sync_msg_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
+        sync_msg_event.wait()
 
 def create_group_cmd(cmd):
     if len(cmd) < 2:
         print(Fore.RED + "Comando 'create_group' requer o nome do grupo!")
+        print(Fore.CYAN + "Digite o comando:")
     elif len(cmd) > 2:
         print(Fore.RED + "Nome do grupo não pode conter espaços!")
+        print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + f"Criando grupo '{cmd[1]}'...")
+        sync_msg_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
+        sync_msg_event.wait()
 
 def delete_group_cmd(cmd):
     if len(cmd) < 2:
         print(Fore.RED + "Comando 'delete_group' requer o nome do grupo!")
+        print(Fore.CYAN + "Digite o comando:")
     elif len(cmd) > 2:
         print(Fore.RED + "Nome do grupo não pode conter espaços!")
+        print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + f"Deletando grupo '{cmd[1]}'...")
+        sync_msg_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
+        sync_msg_event.wait()
 
 def join_cmd(cmd):
     if len(cmd) < 3:
         print(Fore.RED + "Comando 'join' requer o nome do grupo e a chave do grupo!")
+        print(Fore.CYAN + "Digite o comando:")
     elif len(cmd) > 3:
         print(Fore.RED + "Nome do grupo e chave do grupo não podem conter espaços!")
+        print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + f"Entrando no grupo '{cmd[1]}' - '{cmd[2]}'...")
+        sync_msg_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
+        sync_msg_event.wait()
 
 def leave_cmd(cmd):
     if len(cmd) < 2:
         print(Fore.RED + "Comando 'leave' requer o nome do grupo!")
+        print(Fore.CYAN + "Digite o comando:")
     elif len(cmd) > 2:
         print(Fore.RED + "Nome do grupo não pode conter espaços!")
+        print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + f"Saindo do grupo '{cmd[1]}'...")
+        sync_msg_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
+        sync_msg_event.wait()
 
 def chat_group_cmd(cmd):
     if len(cmd) < 4:
         print(Fore.RED + "Comando 'chat_group' requer o nome do grupo, a chave do grupo e a mensagem a ser enviada!")
+        print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + f"Enviando mensagem no grupo '{cmd[1]}' - '{cmd[2]}'...")
+        sync_msg_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
+        sync_msg_event.wait()
 
 def chat_friend_cmd(cmd):
     if len(cmd) < 3:
         print(Fore.RED + "Comando 'chat_friend' requer o nome do amigo e a mensagem a ser enviada!")
+        print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + f"Enviando mensagem ao amigo '{cmd[1]}'...")
+        sync_msg_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
+        sync_msg_event.wait()
 
 main()
