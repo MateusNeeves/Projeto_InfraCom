@@ -29,13 +29,13 @@ def main():
 
         if cmd[0] == 'login':
             if loggedUsername:
-                print(Fore.YELLOW + f"Você já está logado como {loggedUsername}!")
+                print(Fore.YELLOW + f"Você já está logado como {loggedUsername}!\n")
                 print(Fore.CYAN + "Digite o comando:")
             else:
                 login_cmd(cmd)
 
         elif not loggedUsername:
-            print(Fore.RED + "Você precisa estar logado para executar comandos!")
+            print(Fore.RED + "Você precisa estar logado para executar comandos!\n")
             print(Fore.CYAN + "Digite o comando:")
         else:
             if cmd[0] == 'logout':
@@ -50,7 +50,7 @@ def main():
                 list_groups_cmd(cmd)
             elif cmd[0] == 'follow':
                 if cmd[1] == loggedUsername:
-                    print(Fore.RED + "Você não pode seguir a si mesmo!")
+                    print(Fore.RED + "Você não pode seguir a si mesmo!\n")
                     print(Fore.CYAN + "Digite o comando:")
                 else:
                     follow_cmd(cmd)
@@ -71,7 +71,7 @@ def main():
             elif cmd[0] == 'chat_friend':
                 chat_friend_cmd(cmd)
             else:
-                print(Fore.RED + f"Comando '{cmd[0]}' não existe!")
+                print(Fore.RED + f"Comando '{cmd[0]}' não existe!\n")
                 print(Fore.CYAN + "Digite o comando:")
         
         
@@ -105,15 +105,16 @@ def receive_message():
             print(Fore.CYAN + "Digite o comando:")
             sync_msg_event.set()
         except OSError as e:
-            print(Fore.YELLOW + f"Erro ao receber mensagem: {e}")
+            print(Fore.YELLOW + f"Erro ao receber mensagem: {e}\n")
+            print(Fore.CYAN + "Digite o comando:")
             break
 
 def login_cmd(cmd):
     if len(cmd) < 2:
-        print(Fore.RED + "Comando 'login' requer um nome de usuário!")
+        print(Fore.RED + "Comando 'login' requer um nome de usuário!\n")
         print(Fore.CYAN + "Digite o comando:")
     elif len(cmd) > 2:
-        print(Fore.RED + "Nome de usuário não pode conter espaços!")
+        print(Fore.RED + "Nome de usuário não pode conter espaços!\n")
         print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + "Logando...")
@@ -123,7 +124,7 @@ def login_cmd(cmd):
 
 def logout_cmd(cmd):
     if len(cmd) > 1:
-        print(Fore.RED + "Comando 'logout' não requer argumentos!")
+        print(Fore.RED + "Comando 'logout' não requer argumentos!\n")
         print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + "Deslogando...")
@@ -133,7 +134,7 @@ def logout_cmd(cmd):
 
 def list_cinners_cmd(cmd):
     if len(cmd) > 1:
-        print(Fore.RED + "Comando 'list:cinners' não requer argumentos!")
+        print(Fore.RED + "Comando 'list:cinners' não requer argumentos!\n")
         print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + "Carregando lista de usuários conectados...")
@@ -143,7 +144,7 @@ def list_cinners_cmd(cmd):
 
 def list_friends_cmd(cmd):
     if len(cmd) > 1:
-        print(Fore.RED + "Comando 'list:friends' não requer argumentos!")
+        print(Fore.RED + "Comando 'list:friends' não requer argumentos!\n")
         print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + "Carregando lista de amigos...")
@@ -153,7 +154,7 @@ def list_friends_cmd(cmd):
 
 def list_mygroups_cmd(cmd):
     if len(cmd) > 1:
-        print(Fore.RED + "Comando 'list:mygroups' não requer argumentos!")
+        print(Fore.RED + "Comando 'list:mygroups' não requer argumentos!\n")
         print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + "Carregando lista de grupos que você faz parte...")
@@ -163,7 +164,7 @@ def list_mygroups_cmd(cmd):
 
 def list_groups_cmd(cmd):
     if len(cmd) > 1:
-        print(Fore.RED + "Comando 'list:groups' não requer argumentos!")
+        print(Fore.RED + "Comando 'list:groups' não requer argumentos!\n")
         print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + "Carregando lista de grupos que você criou...")
@@ -173,10 +174,10 @@ def list_groups_cmd(cmd):
 
 def follow_cmd(cmd):
     if len(cmd) < 2:
-        print(Fore.RED + "Comando 'follow' requer um nome de usuário!")
+        print(Fore.RED + "Comando 'follow' requer um nome de usuário!\n")
         print(Fore.CYAN + "Digite o comando:")
     elif len(cmd) > 2:
-        print(Fore.RED + "Nome de usuário não pode conter espaços!")
+        print(Fore.RED + "Nome de usuário não pode conter espaços!\n")
         print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + f"Seguindo {cmd[1]}...")
@@ -186,10 +187,10 @@ def follow_cmd(cmd):
 
 def unfollow_cmd(cmd):
     if len(cmd) < 2:
-        print(Fore.RED + "Comando 'unfollow' requer um nome de usuário!")
+        print(Fore.RED + "Comando 'unfollow' requer um nome de usuário!\n")
         print(Fore.CYAN + "Digite o comando:")
     elif len(cmd) > 2:
-        print(Fore.RED + "Nome de usuário não pode conter espaços!")
+        print(Fore.RED + "Nome de usuário não pode conter espaços!\n")
         print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + f"Deixando de seguir {cmd[1]}...")
@@ -199,10 +200,10 @@ def unfollow_cmd(cmd):
 
 def create_group_cmd(cmd):
     if len(cmd) < 2:
-        print(Fore.RED + "Comando 'create_group' requer o nome do grupo!")
+        print(Fore.RED + "Comando 'create_group' requer o nome do grupo!\n")
         print(Fore.CYAN + "Digite o comando:")
     elif len(cmd) > 2:
-        print(Fore.RED + "Nome do grupo não pode conter espaços!")
+        print(Fore.RED + "Nome do grupo não pode conter espaços!\n")
         print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + f"Criando grupo '{cmd[1]}'...")
@@ -212,10 +213,10 @@ def create_group_cmd(cmd):
 
 def delete_group_cmd(cmd):
     if len(cmd) < 2:
-        print(Fore.RED + "Comando 'delete_group' requer o nome do grupo!")
+        print(Fore.RED + "Comando 'delete_group' requer o nome do grupo!\n")
         print(Fore.CYAN + "Digite o comando:")
     elif len(cmd) > 2:
-        print(Fore.RED + "Nome do grupo não pode conter espaços!")
+        print(Fore.RED + "Nome do grupo não pode conter espaços!\n")
         print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + f"Deletando grupo '{cmd[1]}'...")
@@ -225,10 +226,10 @@ def delete_group_cmd(cmd):
 
 def join_cmd(cmd):
     if len(cmd) < 3:
-        print(Fore.RED + "Comando 'join' requer o nome do grupo e a chave do grupo!")
+        print(Fore.RED + "Comando 'join' requer o nome do grupo e a chave do grupo!\n")
         print(Fore.CYAN + "Digite o comando:")
     elif len(cmd) > 3:
-        print(Fore.RED + "Nome do grupo e chave do grupo não podem conter espaços!")
+        print(Fore.RED + "Nome do grupo e chave do grupo não podem conter espaços!\n")
         print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + f"Entrando no grupo '{cmd[1]}' - '{cmd[2]}'...")
@@ -238,10 +239,10 @@ def join_cmd(cmd):
 
 def leave_cmd(cmd):
     if len(cmd) < 2:
-        print(Fore.RED + "Comando 'leave' requer o nome do grupo!")
+        print(Fore.RED + "Comando 'leave' requer o nome do grupo!\n")
         print(Fore.CYAN + "Digite o comando:")
     elif len(cmd) > 2:
-        print(Fore.RED + "Nome do grupo não pode conter espaços!")
+        print(Fore.RED + "Nome do grupo não pode conter espaços!\n")
         print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + f"Saindo do grupo '{cmd[1]}'...")
@@ -251,7 +252,7 @@ def leave_cmd(cmd):
 
 def chat_group_cmd(cmd):
     if len(cmd) < 4:
-        print(Fore.RED + "Comando 'chat_group' requer o nome do grupo, a chave do grupo e a mensagem a ser enviada!")
+        print(Fore.RED + "Comando 'chat_group' requer o nome do grupo, a chave do grupo e a mensagem a ser enviada!\n")
         print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + f"Enviando mensagem no grupo '{cmd[1]}' - '{cmd[2]}'...")
@@ -261,7 +262,7 @@ def chat_group_cmd(cmd):
 
 def chat_friend_cmd(cmd):
     if len(cmd) < 3:
-        print(Fore.RED + "Comando 'chat_friend' requer o nome do amigo e a mensagem a ser enviada!")
+        print(Fore.RED + "Comando 'chat_friend' requer o nome do amigo e a mensagem a ser enviada!\n")
         print(Fore.CYAN + "Digite o comando:")
     else:
         print(Fore.GREEN + f"Enviando mensagem ao amigo '{cmd[1]}'...")
