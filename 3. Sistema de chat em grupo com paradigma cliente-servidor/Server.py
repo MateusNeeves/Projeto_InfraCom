@@ -1,6 +1,7 @@
 import socket
 import random
 import string
+import datetime
 from threading import Thread
 from rdt3_0 import send
 from rdt3_0 import receive
@@ -11,7 +12,7 @@ buffer_size = 1024
 clientList = {} # {username: (address, port)}
 onlineClients = {} # {username: {"seq_num_expected": int}}"}
 friendsList = {} # {username: {friends}}
-groups = {} # {group_id: {"name": str, "key": str, "owner": str, "members": {usersname}}}
+groups = {} # {group_id: {"name": str, "owner": str, "members": {usersname}}}
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_socket.bind((serverName, serverPort))
@@ -162,10 +163,11 @@ def create_group_cmd(skt, cmd, client_address):
     username = find_username_by_address(client_address)
     if not check_group_existance(cmd[1], username):
         group_name = cmd[1]
-        group_id = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
+        group_id = cmd[2]
+        created_at = datetime.datetime.now()
         members = {}
         members[username] = client_address
-        groups[group_id] = {"name": group_name, "owner": username, "members": members}
+        groups[group_id] = {"name": group_name, "owner": username, "created_at": created_at, "members": members}
         send([0], f"O grupo de nome [{group_name}] foi criado com sucesso!\n", skt, (client_address[0], client_address[1]+1))
     else:
         send([0], f"Você já está em um grupo com o nome [{cmd[1]}]\n", skt, (client_address[0], client_address[1]+1))
