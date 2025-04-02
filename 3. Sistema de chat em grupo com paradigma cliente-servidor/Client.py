@@ -202,7 +202,10 @@ def create_group_cmd(cmd):
     if len(cmd) < 2:
         print(Fore.RED + "Comando 'create_group' requer o nome do grupo!\n")
         print(Fore.CYAN + "Digite o comando:")
-    elif len(cmd) > 2:
+    elif len(cmd) < 3:
+        print(Fore.RED + "Comando 'create_group' requer o nome do grupo e a chave do grupo!\n")
+        print(Fore.CYAN + "Digite o comando:")
+    elif len(cmd) > 3:
         print(Fore.RED + "Nome do grupo não pode conter espaços!\n")
         print(Fore.CYAN + "Digite o comando:")
     else:
