@@ -57,9 +57,9 @@ def receive_from_client(data, client_address, count):
     elif cmd[0] == 'list:friends':
         list_friends_cmd(skt, cmd, client_address)
     elif cmd[0] == 'list:mygroups':
-        pass
+        list_mygroups_cmd(skt, cmd, client_address)
     elif cmd[0] == 'list:groups':
-        pass
+        list_groups_cmd(skt, cmd, client_address)
     elif cmd[0] == 'follow':
         follow_cmd(skt, cmd, client_address)
     elif cmd[0] == 'unfollow':
@@ -67,7 +67,7 @@ def receive_from_client(data, client_address, count):
     elif cmd[0] == 'create_group':
         create_group_cmd(skt, cmd, client_address)
     elif cmd[0] == 'delete_group':
-        pass
+        delete_group_cmd(skt, cmd, client_address)
     elif cmd[0] == 'join':
         join_group_cmd(skt, cmd, client_address)
     elif cmd[0] == 'leave':
@@ -164,6 +164,52 @@ def list_friends_cmd(skt, cmd, client_address):
         data += "- " + user + "\n"
     
     send([0], data, skt, (client_address[0], client_address[1]+1))
+
+def list_mygroups_cmd(skt, cmd, client_address):
+    username = find_username_by_address(client_address)
+    data = "Grupos que você criou:\n"
+    has_groups = False
+
+    for group_id, group in groups.items():
+        if group["owner"] == username:
+            has_groups = True
+            data += "- " + group["name"] + " (" + group_id + ")\n"
+
+    if not has_groups:
+        data = "Você não criou nenhum grupo.\n"
+
+    send([0], data, skt, (client_address[0], client_address[1]+1))
+
+def list_groups_cmd(skt, cmd, client_address):
+    username = find_username_by_address(client_address)
+    data = "Grupos que você participa:\n"
+    has_groups = False
+
+    for group_id, group in groups.items():
+        if username in group["members"].keys():
+            has_groups = True
+            data += "- " + group["name"] + "\n"
+
+    if not has_groups:
+        data = "Você não participa de nenhum grupo.\n"
+
+    send([0], data, skt, (client_address[0], client_address[1]+1))
+
+def delete_group_cmd(skt, cmd, client_address):
+    username = find_username_by_address(client_address)
+    group_id = find_group_by_name(cmd[1])
+    if group_id is not None:
+        if groups[group_id]["owner"] == username:
+            members = groups[group_id]["members"].copy()
+            del groups[group_id]
+            send([0], f"Grupo de nome [{cmd[1]}] foi deletado com sucesso!\n", skt, (client_address[0], client_address[1]+1))
+            for member, addr in members.items():
+                if member != username:
+                    send([0], f"[{username}/{client_address[0]}:{client_address[1]}] deletou o grupo [{cmd[1]}]\n", skt, (addr[0], addr[1]+1))
+        else:
+            send([0], f"Você não é o dono do grupo de nome [{cmd[1]}]\n", skt, (client_address[0], client_address[1]+1))
+    else:
+        send([0], f"Grupo de nome [{cmd[1]}] não encontrado\n", skt, (client_address[0], client_address[1]+1))
 
 def create_group_cmd(skt, cmd, client_address):
     username = find_username_by_address(client_address)
