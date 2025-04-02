@@ -171,6 +171,9 @@ def join_group_cmd(skt, cmd, client_address):
             if group["name"] == cmd[1] and group_id == cmd[2]:
                 group["members"][username] = client_address
                 send([0], f"Você entrou no grupo de nome [{cmd[1]}]\n", skt, (client_address[0], client_address[1]+1))
+                for member, addr in group["members"].items():
+                    if member != username:
+                        send([0], f"[{username}/{client_address[0]}:{client_address[1]}] acabou de entrar no grupo\n", skt, (addr[0], addr[1]+1))
                 return
     else:
         send([0], f"Você já está em um grupo com o nome: [{cmd[1]}]\n", skt, (client_address[0], client_address[1]+1))
