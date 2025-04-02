@@ -188,7 +188,7 @@ def list_groups_cmd(skt, cmd, client_address):
     for group_id, group in groups.items():
         if username in group["members"].keys():
             has_groups = True
-            data += "- " + group["name"] + "\n"
+            data += "- " + group["name"] + ' - ' + group["created_at"].strftime("%d/%m/%Y %H:%M:%S") + ' (' + group["owner"] + ')\n'
 
     if not has_groups:
         data = "Você não participa de nenhum grupo.\n"
