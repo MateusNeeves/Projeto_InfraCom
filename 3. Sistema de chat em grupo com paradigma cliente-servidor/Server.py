@@ -70,7 +70,7 @@ def receive_from_client(data, client_address, count):
     elif cmd[0] == 'join':
         join_group_cmd(skt, cmd, client_address)
     elif cmd[0] == 'leave':
-        pass
+        leave_group_cmd(skt, cmd, client_address)
     elif cmd[0] == 'ban':
         pass
     elif cmd[0] == 'chat_group':
