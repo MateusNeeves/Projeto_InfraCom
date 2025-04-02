@@ -1,5 +1,6 @@
 import socket
 import random
+import string
 from threading import Thread
 from rdt3_0 import send
 from rdt3_0 import receive
@@ -10,6 +11,7 @@ buffer_size = 1024
 clientList = {} # {username: (address, port)}
 onlineClients = {} # {username: {"seq_num_expected": int}}"}
 friendsList = {} # {username: {friends}}
+groups = {} # {group_id: {"name": str, "key": str, "owner": str, "members": {usersname}}}
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_socket.bind((serverName, serverPort))
@@ -62,11 +64,11 @@ def receive_from_client(data, client_address, count):
     elif cmd[0] == 'unfollow':
         unfollow_cmd(skt, cmd, client_address)
     elif cmd[0] == 'create_group':
-        pass
+        create_group_cmd(skt, cmd, client_address)
     elif cmd[0] == 'delete_group':
         pass
     elif cmd[0] == 'join':
-        pass
+        join_group_cmd(skt, cmd, client_address)
     elif cmd[0] == 'leave':
         pass
     elif cmd[0] == 'ban':
@@ -81,6 +83,12 @@ def find_username_by_address(addr):
         if client_addr == addr:
             return username
     return None
+
+def check_group_existance(group_name, username):
+    for group_id, group in groups.items():
+        if group["name"] == group_name and username in group["members"].keys():
+            return True
+    return False
 
 def login_cmd(skt, cmd, client_address):
     if cmd[1] in clientList and cmd[1] in onlineClients:
@@ -143,5 +151,29 @@ def list_friends_cmd(skt, cmd, client_address):
         data += "- " + user + "\n"
     
     send([0], data, skt, (client_address[0], client_address[1]+1))
+
+def create_group_cmd(skt, cmd, client_address):
+    username = find_username_by_address(client_address)
+    if not check_group_existance(cmd[1], username):
+        group_name = cmd[1]
+        group_id = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
+        members = {}
+        members[username] = client_address
+        groups[group_id] = {"name": group_name, "owner": username, "members": members}
+        send([0], f"O grupo de nome [{group_name}] foi criado com sucesso!\n", skt, (client_address[0], client_address[1]+1))
+    else:
+        send([0], f"Você já está em um grupo com o nome [{cmd[1]}]\n", skt, (client_address[0], client_address[1]+1))
+
+def join_group_cmd(skt, cmd, client_address):
+    username = find_username_by_address(client_address)
+    if not check_group_existance(cmd[1], username):
+        for group_id, group in groups.items():
+            if group["name"] == cmd[1] and group_id == cmd[2]:
+                group["members"][username] = client_address
+                send([0], f"Você entrou no grupo de nome [{cmd[1]}]\n", skt, (client_address[0], client_address[1]+1))
+                return
+    else:
+        send([0], f"Você já está em um grupo com o nome: [{cmd[1]}]\n", skt, (client_address[0], client_address[1]+1))
+
 
 main()
