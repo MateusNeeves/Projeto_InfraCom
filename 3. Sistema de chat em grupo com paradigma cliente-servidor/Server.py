@@ -90,6 +90,12 @@ def check_group_existance(group_name, username):
             return True
     return False
 
+def find_group_by_name(group_name):
+    for group_id, group in groups.items():
+        if group["name"] == group_name:
+            return group_id
+    return None
+
 def login_cmd(skt, cmd, client_address):
     if cmd[1] in clientList and cmd[1] in onlineClients:
         send([0], "Username já está está sendo utilizado\n", skt, (client_address[0], client_address[1]+1))
@@ -178,5 +184,18 @@ def join_group_cmd(skt, cmd, client_address):
     else:
         send([0], f"Você já está em um grupo com o nome: [{cmd[1]}]\n", skt, (client_address[0], client_address[1]+1))
 
+def leave_group_cmd(skt, cmd, client_address):
+    group_id = find_group_by_name(cmd[1])
+    username = find_username_by_address(client_address)
+    if group_id is not None:
+        if username in groups[group_id]["members"].keys():
+            del groups[group_id]["members"][username]
+            send([0], f"Você saiu do grupo de nome [{cmd[1]}]\n", skt, (client_address[0], client_address[1]+1))
+            for member, addr in groups[group_id]["members"].items():
+                send([0], f"[{username}/{client_address[0]}:{client_address[1]}] saiu do grupo\n", skt, (addr[0], addr[1]+1))
+        else:
+            send([0], f"Você não está no grupo de nome [{cmd[1]}]\n", skt, (client_address[0], client_address[1]+1))
+    else:
+        send([0], f"Grupo de nome [{cmd[1]}] não encontrado\n", skt, (client_address[0], client_address[1]+1))
 
 main()
