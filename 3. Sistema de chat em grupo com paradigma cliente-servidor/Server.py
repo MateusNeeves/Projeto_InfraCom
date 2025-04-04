@@ -197,7 +197,7 @@ def list_groups_cmd(skt, cmd, client_address):
 
 def delete_group_cmd(skt, cmd, client_address):
     username = find_username_by_address(client_address)
-    group_id = find_group_by_name(cmd[1])
+    group_id = find_group_by_name(cmd[1], username)
     if group_id is not None:
         if groups[group_id]["owner"] == username:
             members = groups[group_id]["members"].copy()
