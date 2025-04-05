@@ -129,7 +129,8 @@ def login_cmd(skt, cmd, client_address):
     else:
         clientList[cmd[1]] = client_address
         onlineClients[cmd[1]] = {"seq_num_expected": 1}
-        friendsList[cmd[1]] = set()
+        if cmd[1] not in friendsList:
+            friendsList[cmd[1]] = set()
         send([0], f"Login efetuado com sucesso em [{cmd[1]}]\n", skt, (client_address[0], client_address[1]+1))
 
 def logout_cmd(skt, cmd, client_address):
