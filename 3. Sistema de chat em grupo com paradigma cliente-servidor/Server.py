@@ -230,7 +230,7 @@ def delete_group_cmd(skt, cmd, client_address):
 def create_group_cmd(skt, cmd, client_address):
     # Cria um grupo com nome e chave, se não existir outro com a mesma chave
     username = find_username_by_address(client_address)
-    if check_key_existance(cmd[2]):
+    if check_key_existance(cmd[2]): 
         send([0], f"Já existe um grupo com a chave [{cmd[2]}]\n", skt, (client_address[0], client_address[1]+1))
     elif not check_group_member(cmd[1], username):
         group_name = cmd[1]
@@ -255,7 +255,7 @@ def join_group_cmd(skt, cmd, client_address):
                     if member != username:
                         send([0], f"[{username}/{client_address[0]}:{client_address[1]}] acabou de entrar no grupo [{cmd[1]}]\n", skt, (addr[0], addr[1]+1))
                 return
-        send([0], f"Grupo de nome [{cmd[1]}] não encontrado\n", skt, (client_address[0], client_address[1]+1))
+        send([0], f"Grupo de nome [{cmd[1]}] e chave [{cmd[2]}] não encontrado\n", skt, (client_address[0], client_address[1]+1))
     else:
         send([0], f"Você já está em um grupo com o nome: [{cmd[1]}]\n", skt, (client_address[0], client_address[1]+1))
 
