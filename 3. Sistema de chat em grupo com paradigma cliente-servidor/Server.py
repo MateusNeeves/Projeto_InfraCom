@@ -102,17 +102,17 @@ def check_group_member(group_name, username):
             return True
     return False
 
-def check_group_existance(group_name, group_key):
-    for group_id, group in groups.items():
-        if group["name"] == group_name and group_id == group_key:
-            return True
-    return False
-
 def find_group_by_name(group_name, username):
     for group_id, group in groups.items():
         if group["name"] == group_name and username in group["members"].keys():
             return group_id
     return None
+
+def check_key_existance(group_key):
+    for group_id, group in groups.items():
+        if group_id == group_key:
+            return True
+    return False
 
 def login_cmd(skt, cmd, client_address):
     if cmd[1] in clientList and cmd[1] in onlineClients:
@@ -224,8 +224,8 @@ def delete_group_cmd(skt, cmd, client_address):
 
 def create_group_cmd(skt, cmd, client_address):
     username = find_username_by_address(client_address)
-    if check_group_existance(cmd[1], cmd[2]):
-        send([0], f"Já existe um grupo com o nome [{cmd[1]}] e a chave [{cmd[2]}]\n", skt, (client_address[0], client_address[1]+1))
+    if check_key_existance(cmd[2]):
+        send([0], f"Já existe um grupo com a chave [{cmd[2]}]\n", skt, (client_address[0], client_address[1]+1))
     elif not check_group_member(cmd[1], username):
         group_name = cmd[1]
         group_id = cmd[2]
