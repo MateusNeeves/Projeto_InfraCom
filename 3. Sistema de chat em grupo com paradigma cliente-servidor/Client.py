@@ -169,7 +169,7 @@ def list_mygroups_cmd(cmd):
         print(Fore.RED + "Comando 'list:mygroups' não requer argumentos!\n")
         print(Fore.CYAN + "Digite o comando:")
     else:
-        print(Fore.GREEN + "Carregando lista de grupos que você faz parte...")
+        print(Fore.GREEN + "Carregando lista de grupos que você criou...")
         sync_msg_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
         sync_msg_event.wait()
@@ -179,7 +179,7 @@ def list_groups_cmd(cmd):
         print(Fore.RED + "Comando 'list:groups' não requer argumentos!\n")
         print(Fore.CYAN + "Digite o comando:")
     else:
-        print(Fore.GREEN + "Carregando lista de grupos que você criou...")
+        print(Fore.GREEN + "Carregando lista de grupos que você faz parte...")
         sync_msg_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
         sync_msg_event.wait()

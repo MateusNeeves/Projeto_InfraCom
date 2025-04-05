@@ -306,6 +306,6 @@ def chat_group_cmd(skt, cmd, client_address):
         for member, addr in groups[group_id]["members"].items():
             if username != member:
                 send([0], f"[{username}/{client_address[0]}:{client_address[1]}] em [{cmd[1]}]:[{cmd[3]}]\n", skt, (addr[0], addr[1]+1))
-        send([0], f"Mensagem Enviada\n no grupo [{cmd[1]}]", skt, (client_address[0], client_address[1]+1))
+        send([0], f"Mensagem Enviada no grupo [{cmd[1]}]", skt, (client_address[0], client_address[1]+1))
 main()
 
