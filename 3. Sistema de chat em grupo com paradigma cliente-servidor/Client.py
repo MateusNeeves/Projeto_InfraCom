@@ -25,7 +25,19 @@ def main():
     print(Fore.CYAN + "Digite o comando:")
     while True:
         #print(Fore.CYAN + "Digite o comando:")
-        cmd = input().split(' ', 3)
+        # cmd = input().split(' ', 3)
+
+        parts = input().split(' ')
+
+        if len(parts) >= 4 and parts[0] == "chat_group":
+            mensagem =  " ".join(parts[3:])
+            cmd = [parts[0], parts[1], parts[2], mensagem]  # Captura corretamente nome, chave e mensagem
+        elif len(parts) >= 3 and parts[0] == "chat_friend":
+            mensagem =  " ".join(parts[2:])
+            cmd = [parts[0], parts[1], mensagem]
+        else:
+            cmd = parts
+
 
         if cmd[0] == 'login':
             if loggedUsername:
@@ -272,5 +284,14 @@ def chat_friend_cmd(cmd):
         sync_msg_event.clear()
         send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
         sync_msg_event.wait()
-
+    
+def ban_cmd(cmd):
+    if len(cmd) < 3:
+        print(Fore.RED + "Comando 'ban_cmd' requer o nome do usuário que deve ser banido e o nome do grupo de onde ele deve ser banido!\n")
+        print(Fore.CYAN + "Digite o comando:")
+    else:
+        print(Fore.GREEN + f"'{cmd[1]}' foi banido do grupo")
+        sync_msg_event.clear()
+        send(seq_num, " ".join(cmd), client_socket, (serverName, serverPort))
+        sync_msg_event.wait()
 main()
