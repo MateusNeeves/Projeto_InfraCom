@@ -1,7 +1,7 @@
-# 2. Implementando uma transferência confiável com RDT 3.0
+# 3. Sistema de chat em grupo com paradigma cliente-servidor
 
-Primeiramente, abra um terminal e rode o arquivo UDPServer.py  
-Em seguida, abra outro terminal e rode o arquivo UDPClient.py
+Primeiramente, abra um terminal e rode o arquivo Server.py  
+Em seguida, abra dois terminais e rode o arquivo Client.py, uma para cada cliente
 
 
 ## Integrantes:
